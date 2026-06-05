@@ -1,0 +1,6 @@
+{
+  "name": "Sistem Input Data Penduduk",
+  "description": "Sistem informasi berbasis Kartu Keluarga untuk input data kependudukan secara cepat dan responsif.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

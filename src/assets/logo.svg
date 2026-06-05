@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <!-- Left and Right Wings (Yellow/Orange) -->
+  <path d="M 120 320 Q 50 280 40 180 Q 90 280 160 300 Z" fill="#F59E0B" />
+  <path d="M 280 320 Q 350 280 360 180 Q 310 280 240 300 Z" fill="#F59E0B" />
+  
+  <path d="M 100 290 Q 30 240 20 130 Q 80 240 150 260 Z" fill="#F59E0B" />
+  <path d="M 300 290 Q 370 240 380 130 Q 320 240 250 260 Z" fill="#F59E0B" />
+
+  <path d="M 90 250 Q 20 190 20 80 Q 70 180 140 220 Z" fill="#FCD34D" />
+  <path d="M 310 250 Q 380 190 380 80 Q 330 180 260 220 Z" fill="#FCD34D" />
+
+  <!-- Shield -->
+  <path d="M 200 60 L 320 150 L 320 250 Q 200 340 200 340 Q 200 340 80 250 L 80 150 Z" fill="#10B981" />
+  <path d="M 200 60 L 320 150 Q 200 170 80 150 Z" fill="#1E3A8A" />
+
+  <!-- Wavy Lines -->
+  <path d="M 130 170 Q 165 150 200 170 T 270 170" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
+  <path d="M 130 190 Q 165 170 200 190 T 270 190" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
+  <path d="M 130 210 Q 165 190 200 210 T 270 210" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
+  
+  <!-- Center Plate -->
+  <circle cx="200" cy="250" r="50" fill="#FFFFFF" />
+  
+  <!-- House -->
+  <polygon points="200,215 235,240 165,240" fill="#EF4444" />
+  <rect x="175" y="240" width="50" height="35" fill="#1E293B" />
+  <!-- Pillars / Structure inside house -->
+  <rect x="180" y="250" width="10" height="25" fill="#FFFFFF" />
+  <rect x="210" y="250" width="10" height="25" fill="#FFFFFF" />
+
+  <!-- Rice and Cotton -->
+  <path d="M 155 295 Q 140 250 175 210" fill="none" stroke="#F59E0B" stroke-width="6" stroke-dasharray="2,6" stroke-linecap="round" />
+  <path d="M 245 295 Q 260 250 225 210" fill="none" stroke="#10B981" stroke-width="6" stroke-dasharray="2,6" stroke-linecap="round" />
+  
+  <!-- Ribbon -->
+  <path d="M 50 310 Q 200 360 350 310 L 370 350 Q 200 400 30 350 Z" fill="#EF4444" />
+  
+  <!-- Ribbon Text -->
+  <text x="200" y="352" font-family="Arial, sans-serif" font-weight="900" font-size="22" text-anchor="middle" fill="#FFFFFF" letter-spacing="1">DESA PANYINDANGAN</text>
+  <text x="200" y="375" font-family="Arial, sans-serif" font-weight="700" font-size="11" text-anchor="middle" fill="#FEF08A" letter-spacing="2">KAYADIPADIHARA HARJA</text>
+</svg>

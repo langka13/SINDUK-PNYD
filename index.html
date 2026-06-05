@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Input Buku Induk Penduduk</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #1a56db;
+    --primary-light: #e8f0fe;
+    --danger: #dc3545;
+    --danger-light: #fff0f0;
+    --success: #0f6e56;
+    --success-light: #e1f5ee;
+    --warning: #b45309;
+    --warning-light: #fef3c7;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-600: #6c757d;
+    --border: #dee2e6;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #f0f4f8;
+    font-size: 14px;
+    color: #1a1a2e;
+    position: relative;
+    min-height: 100vh;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vmin;
+    height: 80vmin;
+    background-image: url('/src/assets/logo.svg');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.12;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* HEADER */
+  .app-header {
+    background: linear-gradient(135deg, #1a56db 0%, #0f3f9e 100%);
+    color: white;
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 8px rgba(26,86,219,0.4);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .app-header .brand-icon {
+    width: 60px; height: 60px;
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .app-header h1 { font-size: 18px; font-weight: 700; margin: 0; line-height: 1.2; }
+  .app-header small { font-size: 12px; opacity: 0.75; display: block; }
+
+  /* LAYOUT */
+  .auth-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: transparent; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; overflow-y: auto;
+  }
+  .auth-card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+    width: 100%; max-width: 460px; padding: 32px;
+    border: 1px solid #e2e8f0;
+  }
+  .auth-header { text-align: center; margin-bottom: 24px; }
+  .auth-header .brand-icon { font-size: 40px; margin-bottom: 12px; }
+  .auth-header h2 { font-size: 22px; font-weight: 700; color: #0f172a; margin:0 0 6px 0; }
+  .auth-header p { font-size: 14px; color: #64748b; margin:0; }
+  
+  .terms-box {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 16px;
+    font-size: 12px; color: #475569;
+    max-height: 160px; overflow-y: auto;
+    margin-bottom: 20px; line-height: 1.5;
+  }
+  .auth-form .form-label { font-size: 13px; color: #334155; font-weight: 600; margin-bottom: 8px; }
+  .auth-form .form-control { font-size: 14.5px; padding: 12px 14px; border-radius: 8px; height: auto !important; }
+  .auth-form .btn-login {
+    width: 100%; padding: 14px; font-weight: 700; font-size: 15px;
+    border-radius: 8px; background: #2563eb; color: #fff;
+    border: none; margin-top: 10px; transition: 0.2s;
+  }
+  .auth-form .btn-login:hover { background: #1d4ed8; }
+  .auth-form .form-check-label { font-size: 12.5px; color: #334155; line-height: 1.4; user-select: none; }
+  
+  .main-wrap { max-width: 960px; margin: 0 auto; padding: 28px 16px 60px; }
+
+  /* TABS NAVIGATION */
+  .nav-tabs-custom {
+    display: flex; gap: 10px; margin-bottom: 20px;
+    border-bottom: 2px solid var(--border);
+  }
+  .nav-tab {
+    padding: 10px 20px; font-weight: 600; color: var(--gray-600);
+    cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px;
+    transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .nav-tab:hover { color: var(--primary); }
+  .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* SECTION CARDS */
+  .section-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 14px 20px;
+    border-bottom: 1.5px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-header.part-a { background: #eff6ff; border-bottom-color: #bfdbfe; }
+  .section-header.part-b { background: #f0fdf4; border-bottom-color: #bbf7d0; }
+  .section-badge {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: white;
+    flex-shrink: 0;
+  }
+  .badge-a { background: #1a56db; }
+  .badge-b { background: #0f6e56; }
+  .section-title { font-weight: 700; font-size: 15px; margin: 0; }
+  .section-subtitle { font-size: 12px; color: var(--gray-600); margin: 0; }
+  .section-body { padding: 20px; }
+
+  /* FORM ELEMENTS */
+  .form-label { font-weight: 600; font-size: 13px; margin-bottom: 5px; color: #374151; }
+  .form-control, .form-select, .select2-container--bootstrap-5 .select2-selection {
+    border-radius: 8px !important;
+    border: 1.5px solid #d1d5db !important;
+    font-size: 13.5px !important;
+    height: 38px !important;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(26,86,219,0.12) !important;
+  }
+
+  /* KK INPUT WITH STATUS */
+  .kk-input-wrap { position: relative; }
+  .kk-status {
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600;
+    pointer-events: none;
+  }
+  .kk-status.hidden { display: none; }
+  .kk-status.checking { color: #6b7280; }
+  .kk-status.ok { color: var(--success); }
+  .kk-status.duplicate { color: var(--danger); }
+  .kk-status .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .kk-status.checking .dot { background: #9ca3af; animation: pulse 1s infinite; }
+  .kk-status.ok .dot { background: #10b981; }
+  .kk-status.duplicate .dot { background: var(--danger); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* DUPLICATE ALERT BOX */
+  .duplicate-alert {
+    background: var(--danger-light);
+    border: 1.5px solid #fca5a5;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 8px;
+    display: none;
+  }
+  .duplicate-alert.show { display: flex; gap: 10px; align-items: flex-start; }
+  .duplicate-alert .alert-icon { font-size: 18px; flex-shrink: 0; }
+  .duplicate-alert .alert-body {}
+  .duplicate-alert .alert-title { font-weight: 700; color: #991b1b; font-size: 13px; }
+  .duplicate-alert .alert-detail { font-size: 12px; color: #7f1d1d; margin-top: 3px; }
+  .duplicate-alert .existing-data {
+    background: white; border-radius: 6px;
+    padding: 8px 10px; margin-top: 8px;
+    font-size: 12px; border: 1px solid #fca5a5;
+  }
+  .existing-data .label { color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .existing-data .value { font-weight: 600; color: #1f2937; }
+
+  /* MEMBER CARDS */
+  .member-card {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .member-card:hover { border-color: #a5b4fc; }
+  .member-card-header {
+    background: var(--gray-100);
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .member-number {
+    width: 26px; height: 26px;
+    background: #1a56db;
+    border-radius: 6px;
+    color: white;
+    font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .member-card-title { font-weight: 600; font-size: 13px; margin: 0 10px; flex-grow: 1; }
+  .member-status-badge {
+    font-size: 11px; font-weight: 600;
+    padding: 3px 8px; border-radius: 20px;
+    background: var(--primary-light); color: var(--primary);
+  }
+  .btn-remove-member {
+    background: none; border: none;
+    color: #ef4444; cursor: pointer; padding: 4px 8px;
+    border-radius: 6px; font-size: 12px;
+    display: flex; align-items: center; gap: 4px;
+    transition: background 0.15s;
+  }
+  .btn-remove-member:hover { background: #fee2e2; }
+  .member-body { padding: 14px 16px 16px; }
+
+  /* NIK CHECK */
+  .nik-status-msg {
+    font-size: 11.5px; font-weight: 600;
+    margin-top: 4px; display: none;
+  }
+  .nik-status-msg.ok { color: var(--success); display: block; }
+  .nik-status-msg.duplicate { color: var(--danger); display: block; }
+
+  /* BUTTONS */
+  .btn-add-member {
+    background: white;
+    border: 2px dashed #93c5fd;
+    color: #1a56db;
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-weight: 600; font-size: 13.5px;
+    width: 100%; cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-add-member:hover {
+    background: var(--primary-light);
+    border-color: #3b82f6;
+  }
+  .btn-submit {
+    background: linear-gradient(135deg, #1a56db, #0f3f9e);
+    color: white; border: none;
+    border-radius: var(--radius);
+    padding: 14px 36px;
+    font-weight: 700; font-size: 15px;
+    cursor: pointer; width: 100%;
+    box-shadow: 0 4px 14px rgba(26,86,219,0.35);
+    transition: all 0.2s;
+  }
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(26,86,219,0.4); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* COUNTER BAR */
+  .counter-bar {
+    background: white; border-radius: var(--radius);
+    padding: 12px 20px;
+    display: flex; gap: 20px; align-items: center;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .counter-item { text-align: center; }
+  .counter-item .num { font-weight: 700; font-size: 20px; color: #1a56db; line-height: 1; }
+  .counter-item .lbl { font-size: 11px; color: var(--gray-600); margin-top: 2px; }
+  .counter-sep { width: 1px; height: 36px; background: var(--border); }
+
+  /* VALIDATION HINTS */
+  .char-count { font-size: 11px; color: var(--gray-600); text-align: right; margin-top: 3px; }
+  .char-count.error { color: var(--danger); }
+  .char-count.ok { color: var(--success); }
+
+  /* REQUIRED */
+  .req { color: #ef4444; margin-left: 2px; }
+
+  /* DIVIDER */
+  .form-divider {
+    height: 1px; background: var(--gray-200);
+    margin: 14px 0;
+  }
+
+  /* LOADING OVERLAY */
+  #loadingOverlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+    align-items: center; justify-content: center;
+  }
+  #loadingOverlay.show { display: flex; }
+  .loading-box {
+    background: white; border-radius: 14px;
+    padding: 30px 40px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #1a56db;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* SELECT2 overrides */
+  .select2-container { width: 100% !important; }
+  .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    line-height: 36px !important; font-size: 13.5px !important;
+  }
+
+  @media (max-width: 576px) {
+    .main-wrap { padding: 12px 10px 40px !important; }
+    .app-header { padding: 10px 16px !important; gap: 10px !important; }
+    .app-header h1 { font-size: 15px !important; }
+    
+    .nav-tabs-custom { overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
+
+    .counter-bar { padding: 10px 14px !important; gap: 10px !important; justify-content: space-between !important; margin-bottom: 12px !important; }
+    .counter-item .num { font-size: 18px !important; }
+    .counter-item .lbl { font-size: 10px !important; }
+    .counter-sep { height: 28px !important; }
+
+    .section-body { padding: 14px 14px !important; }
+    .member-body { padding: 10px 12px 14px !important; }
+    .member-card-header { padding: 8px 12px !important; }
+
+    .form-control, .form-select, .select2-container--bootstrap-5 .select2-selection, .select2-container--bootstrap-5 .select2-search__field {
+      font-size: 16px !important; height: 42px !important;
+    }
+    .form-label { font-size: 12.5px !important; }
+
+    .btn-remove-member { padding: 8px 12px !important; font-size: 12.5px !important; min-height: 38px; background: #fee2e2; }
+    .btn-add-member { padding: 12px 20px !important; font-size: 14px !important; min-height: 44px !important; }
+    .btn-submit { padding: 14px 20px !important; font-size: 14.5px !important; min-height: 48px !important; }
+
+    .kk-status { right: 12px !important; font-size: 11px !important; }
+  }
+
+  /* DataTable Tweaks */
+  .table-responsive { font-size: 13px; }
+  .table th { background-color: #f8f9fa; font-weight: 600; white-space: nowrap; }
+  .table td { vertical-align: middle; }
+
+  /* Dashboard Tweaks (Mobile First) */
+  .dash-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.025);
+    border: 1px solid #eef2f6;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .dash-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  }
+  .dash-card.accent-blue::after { background: #3b82f6; }
+  .dash-card.accent-green::after { background: #10b981; }
+  .dash-card.accent-orange::after { background: #f59e0b; }
+  .dash-card.accent-purple::after { background: #8b5cf6; }
+
+  .dash-card .val {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.1;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .dash-card .lbl {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+  }
+  
+  .dash-chart-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #eef2f6;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.025);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .custom-scroller::-webkit-scrollbar { width: 4px; }
+  .custom-scroller::-webkit-scrollbar-track { background: transparent; }
+  .custom-scroller::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  .dash-chart-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #f8fafc;
+    padding-bottom: 12px;
+  }
+  .chart-wrapper {
+    position: relative;
+    height: 200px;
+    width: 100%;
+  }
+  
+  /* Desktop Adjustments */
+  @media(min-width: 768px) {
+    .dash-card { padding: 24px; }
+    .dash-card .val { font-size: 32px; }
+    .dash-card .lbl { font-size: 13px; }
+    .dash-chart-card { padding: 24px; }
+    .dash-chart-title { font-size: 15px; margin-bottom: 20px; }
+    .chart-wrapper { height: 260px; }
+    .chart-wrapper.sm { height: 220px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN & CONSENT OVERLAY -->
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="brand-icon mx-auto mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+        <img src="/src/assets/logo.svg" style="width:100%; height:auto; max-height:100%; object-fit: contain;" alt="Logo Desa Panyindangan">
+      </div>
+      <h2>Login Petugas</h2>
+      <p>Sistem Input Data Penduduk</p>
+      <p>Desa Panyindangan</p>
+    </div>
+    
+    <div class="terms-box">
+      <strong>Syarat & Ketentuan Akses:</strong><br><br>
+      1. Akses hanya diberikan kepada petugas yang berwenang.<br>
+      2. Segala bentuk penyalahgunaan data pribadi penduduk melanggar UU no. 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP).<br>
+      3. Petugas <strong>wajib bertanggung jawab penuh</strong> menjaga kerahasiaan dan keamanan data NIK serta no. KK penduduk.<br>
+      4. Aktivitas login dan input data tercatat secara sistem.
+    </div>
+
+    <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+      <div class="mb-3">
+        <label class="form-label">NIK Petugas</label>
+        <input type="text" id="loginNik" class="form-control" placeholder="Masukkan 16 digit NIK" required pattern="[0-9]{16}">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" id="loginPwd" class="form-control" placeholder="Masukkan kata sandi" required>
+      </div>
+      <div class="form-check mb-4 mt-3">
+        <input class="form-check-input" type="checkbox" id="consentCheck" required>
+        <label class="form-check-label" for="consentCheck">
+          Saya menyetujui syarat & ketentuan dan siap bertanggung jawab menjaga kerahasiaan data penduduk.
+        </label>
+      </div>
+      <button type="submit" class="btn-login" id="btnLogin">Masuk Aplikasi</button>
+    </form>
+    
+    <div class="text-center mt-3" style="font-size: 13px; color: #475569;">
+      <p>Belum punya akses? Silakan hubungi admin:<br>
+      <a href="https://wa.me/6285860286119" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none;">WhatsApp: 085860286119</a></p>
+      <p style="font-size: 12px; margin-top: 10px;">*Pendaftaran memerlukan verifikasi data diri (KTP).</p>
+    </div>
+  </div>
+</div>
+
+<div id="appContainer" style="display: none;">
+
+<div class="app-header">
+  <div class="brand-icon"><img src="/src/assets/logo.svg" style="width:100%; height:auto; max-height:100%; object-fit: contain;" alt="Logo Desa Panyindangan"></div>
+  <div>
+    <h1>Sistem Input Data Penduduk</h1>
+    <small>Desa Panyindangan</small>
+  </div>
+  <div style="margin-left:auto;">
+    <button class="btn btn-sm btn-outline-light" onclick="handleLogout()">Keluar</button>
+  </div>
+</div>
+
+<div class="main-wrap">
+
+  <!-- NAVIGATION TABS -->
+  <div class="nav-tabs-custom">
+    <button class="nav-tab active" onclick="switchTab('form')">Formulir Pendataan</button>
+    <button class="nav-tab" onclick="switchTab('dashboard')">Dashboard Statistik</button>
+    <button class="nav-tab" onclick="switchTab('database')">Database</button>
+  </div>
+
+  <!-- TAB 1: FORM PENDAFTARAN -->
+  <div id="tab-form" class="tab-content active">
+    <!-- COUNTER BAR -->
+    <div class="counter-bar">
+      <div class="counter-item">
+        <div class="num" id="cntKK">–</div>
+        <div class="lbl">No KK</div>
+      </div>
+      <div class="counter-sep"></div>
+      <div class="counter-item">
+        <div class="num" id="cntMember">1</div>
+        <div class="lbl">Anggota</div>
+      </div>
+      <div class="counter-sep"></div>
+      <div class="counter-item">
+        <div class="num" id="cntKepala">0</div>
+        <div class="lbl">Kepala Keluarga</div>
+      </div>
+      <div style="margin-left:auto; font-size:12px; color:var(--gray-600);">
+        <span id="connStatus">⚪ Menghubungkan...</span>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end mb-3">
+      <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearForm()">
+        ✖ Reset Formulir
+      </button>
+    </div>
+    <form id="mainForm" novalidate>
+
+      <!-- ===== BAGIAN A: DATA MASTER KK ===== -->
+      <div class="section-card">
+        <div class="section-header part-a">
+          <div class="section-badge badge-a">A</div>
+          <div>
+            <p class="section-title">Data Identitas Keluarga</p>
+            <p class="section-subtitle">Diisi sekali untuk seluruh anggota KK ini</p>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="row g-3">
+
+            <!-- NO KK -->
+            <div class="col-md-6">
+              <label class="form-label">No. Kartu Keluarga <span class="req">*</span></label>
+              <div class="kk-input-wrap">
+                <input type="text" id="noKK" class="form-control" placeholder="16 digit No. KK" 
+                       maxlength="19" inputmode="numeric" autocomplete="off">
+                <div class="kk-status hidden" id="kkStatus">
+                  <span class="dot"></span>
+                  <span class="msg"></span>
+                </div>
+              </div>
+              <div class="char-count" id="kkCount">0 / 16 digit</div>
+              <div class="duplicate-alert" id="kkDupAlert">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-body">
+                  <div class="alert-title">No. KK Sudah Terdaftar!</div>
+                  <div class="alert-detail">Data dengan No. KK ini sudah ada di database. Cek sebelum menyimpan.</div>
+                  <div class="existing-data" id="kkDupDetail"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- NAMA KK -->
+            <div class="col-md-6">
+              <label class="form-label">Nama Kepala Keluarga <span class="req">*</span></label>
+              <input type="text" id="namaKK" class="form-control" placeholder="Otomatis dari data Kepala Keluarga" readonly>
+              <div style="font-size:11px; color:var(--gray-600); margin-top:4px;">
+                ℹ️ Terisi otomatis dari anggota berstatus Kepala Keluarga.
+              </div>
+            </div>
+
+            <!-- ALAMAT -->
+            <div class="col-md-4">
+              <label class="form-label">Alamat (Dusun/Kampung) <span class="req">*</span></label>
+              <select id="alamat" class="form-select">
+                <option value="">-- Pilih atau ketik alamat --</option>
+              </select>
+            </div>
+
+            <!-- NO RW -->
+            <div class="col-md-4">
+              <label class="form-label">No. RW <span class="req">*</span></label>
+              <select id="noRW" class="form-select">
+                <option value="">Pilih RW</option>
+                <option>1</option><option>2</option><option>3</option>
+                <option>4</option><option>5</option><option>6</option>
+              </select>
+            </div>
+
+            <!-- NO RT -->
+            <div class="col-md-4">
+              <label class="form-label">No. RT <span class="req">*</span></label>
+              <select id="noRT" class="form-select">
+                <option value="">Pilih RT</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== BAGIAN B: DATA ANGGOTA ===== -->
+      <div class="section-card">
+        <div class="section-header part-b">
+          <div class="section-badge badge-b">B</div>
+          <div>
+            <p class="section-title">Data Anggota Keluarga</p>
+            <p class="section-subtitle">Hanya 1 Kepala Keluarga, sisanya Istri/Anak/Lainnya</p>
+          </div>
+        </div>
+        <div class="section-body">
+          <div id="memberContainer"></div>
+
+          <button type="button" class="btn-add-member mt-2" id="btnAddMember">
+            <span style="font-size:18px; line-height:1;">＋</span>
+            Tambah Anggota Keluarga
+          </button>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        💾 Simpan Data Keluarga ke Spreadsheet
+      </button>
+
+    </form>
+  </div>
+
+  <!-- TAB 2: DASHBOARD STATISTIK -->
+  <div id="tab-dashboard" class="tab-content">
+    <div class="section-card">
+      <div class="section-header" style="background: #f8f9fa;">
+        <h3 class="section-title" style="font-size: 16px;">📊 Informasi Kependudukan</h3>
+      </div>
+      <div class="section-body" style="background: #f0f4f8;">
+        <div id="dashboardStats" class="row g-3">
+          <div class="col-12"><div class="text-center py-4 text-muted">Memuat statistik...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: DATABASE CRUD -->
+  <div id="tab-database" class="tab-content">
+    <div class="section-card">
+      <div class="section-header d-flex justify-content-between align-items-center" style="background: #f8f9fa;">
+        <div>
+          <h3 class="section-title" style="font-size: 16px;">🗂️ Pusat Pemutakhiran Data</h3>
+          <p class="section-subtitle">Read, Update, Delete data penduduk di Spreadsheet secara langsung</p>
+        </div>
+        <button class="btn btn-sm btn-outline-primary fw-bold" onclick="loadExistingData()">🔄 Segarkan Data</button>
+      </div>
+      <div class="section-body">
+        <div class="row g-2 mb-3">
+          <div class="col-md-5">
+            <input type="text" id="searchInput" class="form-control" placeholder="🔍 Cari NIK / Nama / No KK..." oninput="renderTable()">
+          </div>
+          <div class="col-md-3">
+            <select id="filterRWDb" class="form-select" onchange="renderTable()">
+              <option value="">Semua RW</option>
+              <option>1</option><option>2</option><option>3</option>
+              <option>4</option><option>5</option><option>6</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="table-responsive border rounded bg-white">
+          <table class="table table-hover align-middle mb-0" id="dbTable">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3 text-center" style="width: 50px;">No</th>
+                <th>NIK & Nama</th>
+                <th>Tempat & Tgl Lahir</th>
+                <th>No KK & Kepala Keluarga</th>
+                <th>SHDK</th>
+                <th>Alamat</th>
+                <th class="text-center" style="min-width: 120px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="7" class="text-center py-4 text-muted">Memuat database...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal Detail -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold">📄 Detail Penduduk</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 text-dark" id="detailModalBody" style="font-size: 14px;">
+        <!-- Content inserted here -->
+      </div>
+      <div class="modal-footer bg-light p-2 border-top-0">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div style="font-weight:600; font-size:15px; color:#1f2937;" id="overlayText">Menyimpan data…</div>
+    <div style="font-size:12px; color:#6b7280; margin-top:4px;">Harap tunggu sebentar</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// ====================================================
+// KONFIGURASI — ganti URL Apps Script Anda di sini
+// ====================================================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwS_rkFIL0jkXnooa8BKCmUBv-coz51i3qaHfDPtLMijw9VFnThzTGMMjDGPWsTyR_TtQ/exec';
+
+// DATA STATIS
+const RT_MAP = {
+  '1': [1,2,3,4], '2': [5,6,7,8], '3': [9,10,11,12],
+  '4': [13,14,15], '5': [16,17,18], '6': [19,20]
+};
+const ALAMAT_LIST = [
+  'BABAKAN','BOJONG','DANGDEUR',
+  'DUSUN BABAKAN','DUSUN BAROS','DUSUN BOJONG',
+  'DUSUN DANGDEUR','DUSUN MANYINTREUK',
+  'DUSUN PASIRMUNCANG','KAMPUNG BABAKAN','KAMPUNG BAROS',
+  'KAMPUNG BOJONG','KAMPUNG DANGDEUR','KAMPUNG MANYINTREUK',
+  'KAMPUNG PASIRMUNCANG LANDEUH','KAMPUNG PASIRMUNCANG TONGGOH',
+  'DUSUN PASIRMUNCANG LANDEUH','DUSUN PASIRMUNCANG TONGGOH'
+];
+
+const STATUS_OPTIONS = ['Kepala Keluarga','Suami','Istri','Anak','Menantu','Cucu','Orang Tua','Mertua','Famili Lain','Pembantu','Lainnya'];
+const GOLDAR_OPTIONS = ['-','A','B','AB','O'];
+const AGAMA_OPTIONS = ['Islam','Kristen','Katolik','Hindu','Buddha','Konghucu'];
+const PENDIDIKAN_OPTIONS = ['TIDAK/BELUM SEKOLAH','BELUM TAMAT SD/SEDERAJAT','TAMAT SD/SEDERAJAT','SLTP/SEDERAJAT (SMP)','SLTA/SEDERAJAT (SMA/SMK)','DIPLOMA I/II/III','DIPLOMA IV / STRATA I (S1)','STRATA II (S2)','STRATA III (S3)'];
+const PEKERJAAN_OPTIONS = ['Belum/Tidak Bekerja','Mengurus Rumah Tangga','Pelajar/Mahasiswa','Guru','Dokter','Perawat','Sopir','Ojek','Wartawan','Seniman','Pegawai Negeri Sipil (PNS)','Tentara Nasional Indonesia (TNI)','Kepolisian (POLRI)','Karyawan Swasta','Karyawan BUMN','Karyawan BUMD','Wiraswasta','Wirausaha','Pedagang','Petani/Pekebun','Peternak','Nelayan/Perikanan','Lainnya'];
+const STATUS_KAWIN_OPTIONS = ['Belum Kawin','Kawin','Cerai Hidup','Cerai Mati'];
+
+let memberCount = 0;
+let existingData = []; 
+let kkCheckTimer = null;
+let nikCheckTimers = {};
+let isEditMode = false;
+let originalEditPayload = null;
+
+function getFormDataPayload() {
+  const kkDigits = cleanDigits($('#noKK').val() || '');
+  const alamat = $('#alamat').val()?.toUpperCase() || '';
+  const rw = $('#noRW').val() || '';
+  const rt = $('#noRT').val() || '';
+  const namaKK = $('#namaKK').val() || '';
+
+  const members = [];
+  $('.member-card').each(function() {
+    const i = $(this).attr('data-idx');
+    members.push({
+      nik: cleanDigits($(`#nik-${i}`).val() || ''),
+      namaLengkap: $(`#nama-${i}`).val() || '',
+      statusHubungan: $(`#status-${i}`).val() || '',
+      jenisKelamin: $(`#jk-${i}`).val() || '',
+      tempatLahir: $(`#tptLahir-${i}`).val() || '',
+      tanggalLahir: $(`#tglLahir-${i}`).val() || '',
+      golonganDarah: $(`#goldar-${i}`).val() || '',
+      agama: $(`#agama-${i}`).val() || '',
+      pendidikan: $(`#pendidikan-${i}`).val() || '',
+      pekerjaan: $(`#pekerjaan-${i}`).val() || '',
+      statusKawin: $(`#kawin-${i}`).val() || '',
+      namaIbu: $(`#namaIbu-${i}`).val() || '',
+      namaAyah: $(`#namaAyah-${i}`).val() || '',
+    });
+  });
+  return JSON.stringify({ kkDigits, alamat, rw, rt, members });
+}
+
+function checkFormChanges() {
+  if (isEditMode && originalEditPayload) {
+    if (getFormDataPayload() === originalEditPayload) {
+      $('#btnSubmit').prop('disabled', true).html('💾 Data Belum Dirubah');
+    } else {
+      $('#btnSubmit').prop('disabled', false).html('💾 Update Data Keluarga ke Spreadsheet');
+    }
+  } else {
+    $('#btnSubmit').prop('disabled', false).html('💾 Simpan Data Keluarga ke Spreadsheet');
+  }
+}
+
+// Tabs functionality
+function switchTab(tabId) {
+  $('.nav-tab').removeClass('active');
+  $(`.nav-tab[onclick="switchTab('${tabId}')"]`).addClass('active');
+  $('.tab-content').removeClass('active');
+  $(`#tab-${tabId}`).addClass('active');
+  
+  if (tabId === 'dashboard' || tabId === 'database') {
+    if(existingData.length === 0 && $('#connStatus').text().includes('Offline') === false) {
+      loadExistingData();
+    } else {
+      renderDashboard();
+      renderTable();
+    }
+  }
+}
+
+function cleanDigits(v) { return v ? v.replace(/\D/g,'') : ''; }
+
+function formatNoKK(digits) {
+  if (digits.length > 12) return digits.substr(0,6)+' '+digits.substr(6,6)+' '+digits.substr(12);
+  else if (digits.length > 6) return digits.substr(0,6)+' '+digits.substr(6);
+  return digits;
+}
+
+function showKKStatus(type, msg) {
+  const el = $('#kkStatus');
+  el.removeClass('hidden checking ok duplicate').addClass(type);
+  el.find('.msg').text(msg);
+}
+function hideKKStatus() { $('#kkStatus').addClass('hidden'); }
+
+function checkKKLocal(kkDigits) {
+  if (isEditMode) {
+    showKKStatus('ok', '✓ Mode Update');
+    return;
+  }
+  if (!existingData.length) return;
+  const found = existingData.find(r => cleanDigits(r.noKK||'') === kkDigits);
+  if (found) {
+    showKKStatus('duplicate', '⛔ Sudah terdaftar');
+    $('#kkDupAlert').addClass('show');
+    let detail = `<div class="label">Data yang sudah ada:</div>`;
+    detail += `<div class="value">👤 ${found.namaKK||'–'}</div>`;
+    detail += `<div class="value">🏠 ${found.alamat||'–'} | RW ${found.rw||'–'} RT ${found.rt||'–'}</div>`;
+    $('#kkDupDetail').html(detail);
+  } else {
+    showKKStatus('ok', '✓ Belum terdaftar');
+  }
+}
+
+function checkNIKLocal(nikDigits, idx) {
+  const statusMsg = $(`#nikStatus-${idx}`);
+  if (isEditMode) {
+    statusMsg.text('✓ Mode Update').addClass('ok').show();
+    return;
+  }
+  const found = existingData.find(r => cleanDigits(r.nik||'') === nikDigits);
+  if (found) {
+    statusMsg.text(`⛔ NIK sudah ada: ${found.nama||'?'}`).addClass('duplicate').show();
+  } else {
+    statusMsg.text('✓ (tidak terdeteksi duplikat)').addClass('ok').show();
+  }
+}
+
+function updateMemberTitle(idx) {
+  const nama = $(`#nama-${idx}`).val() || `Anggota #${idx}`;
+  const status = $(`#status-${idx}`).val();
+  const icon = status === 'Kepala Keluarga' ? '👑' : status === 'Istri' ? '👩' : status === 'Anak' ? '👦' : '👤';
+  $(`#memberTitle-${idx}`).text(`${icon} ${nama}`);
+}
+
+function updateCounters() {
+  const total = $('.member-card').length;
+  const kepala = $('.status-input').filter(function(){return $(this).val()==='Kepala Keluarga';}).length;
+  $('#cntMember').text(total);
+  $('#cntKepala').text(kepala);
+}
+
+function createMemberHTML(idx) {
+  const isFirst = idx === 1;
+  const defaultStatus = isFirst ? 'Kepala Keluarga' : '';
+
+  let statusOptions = STATUS_OPTIONS.map(s => `<option value="${s}" ${s === defaultStatus ? 'selected' : ''}>${s}</option>`).join('');
+  let goldarOpts = GOLDAR_OPTIONS.map(s => `<option>${s}</option>`).join('');
+  let agamaOpts = AGAMA_OPTIONS.map(s => `<option ${s==='Islam'?'selected':''}>${s}</option>`).join('');
+  let pendOpts = PENDIDIKAN_OPTIONS.map(s => `<option>${s}</option>`).join('');
+  let kerjaOpts = PEKERJAAN_OPTIONS.map(s => `<option>${s}</option>`).join('');
+  
+  let kawinOpts = STATUS_KAWIN_OPTIONS.map(s => `<option ${(s === 'Belum Kawin' && !isFirst) || (s === 'Kawin' && isFirst) ? 'selected' : ''}>${s}</option>`).join('');
+
+  return `
+  <div class="member-card" id="member-${idx}" data-idx="${idx}">
+    <div class="member-card-header">
+      <div class="member-number">${idx}</div>
+      <div class="member-card-title" id="memberTitle-${idx}">${isFirst ? '👑 Kepala Keluarga' : `Anggota #${idx}`}</div>
+      <div style="margin-left:auto; margin-right:8px;"><span class="member-status-badge" id="memberBadge-${idx}">${defaultStatus||'–'}</span></div>
+      ${!isFirst ? `<button type="button" class="btn-remove-member" onclick="removeMember(${idx})"><span>✕</span> Hapus</button>` : ''}
+    </div>
+    <div class="member-body">
+      <div class="row g-2">
+        <div class="col-md-6">
+          <label class="form-label">NIK <span class="req">*</span></label>
+          <input type="text" class="form-control nik-input" id="nik-${idx}" placeholder="16 digit NIK" maxlength="19" inputmode="numeric" data-idx="${idx}" autocomplete="off">
+          <div class="char-count" id="nikCount-${idx}">0 / 16 digit</div><div class="nik-status-msg" id="nikStatus-${idx}"></div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Nama Lengkap <span class="req">*</span></label>
+          <input type="text" class="form-control nama-input text-uppercase" id="nama-${idx}" placeholder="Nama lengkap KAPITAL" data-idx="${idx}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Status Hubungan <span class="req">*</span></label>
+          <select class="form-select status-input" id="status-${idx}" data-idx="${idx}"><option value="">Pilih</option>${statusOptions}</select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Jenis Kelamin <span class="req">*</span></label>
+          <select class="form-select" id="jk-${idx}"><option value="">Pilih</option><option value="1">1 - Laki-laki</option><option value="2">2 - Perempuan</option></select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Gol. Darah</label>
+          <select class="form-select" id="goldar-${idx}">${goldarOpts}</select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Tempat Lahir <span class="req">*</span></label>
+          <input type="text" class="form-control text-uppercase" id="tptLahir-${idx}" placeholder="Kota lahir">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Tanggal Lahir <span class="req">*</span></label>
+          <input type="date" class="form-control" id="tglLahir-${idx}" max="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Agama</label>
+          <select class="form-select" id="agama-${idx}">${agamaOpts}</select>
+        </div>
+        <div class="form-divider"></div>
+        <div class="col-md-6">
+          <label class="form-label">Pendidikan Terakhir</label>
+          <select class="form-select" id="pendidikan-${idx}">${pendOpts}</select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Jenis Pekerjaan</label>
+          <select class="form-select" id="pekerjaan-${idx}">${kerjaOpts}</select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Status Perkawinan</label>
+          <select class="form-select" id="kawin-${idx}">${kawinOpts}</select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Nama Lengkap Ibu</label>
+          <input type="text" class="form-control text-uppercase" id="namaIbu-${idx}" placeholder="Nama ibu kandung">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Nama Lengkap Ayah</label>
+          <input type="text" class="form-control text-uppercase" id="namaAyah-${idx}" placeholder="Nama ayah kandung">
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function addMember() {
+  memberCount++;
+  $('#memberContainer').append(createMemberHTML(memberCount));
+  bindMemberEvents(memberCount);
+  updateCounters();
+}
+
+function removeMember(idx) {
+  if ($('.member-card').length <= 1) {
+    Swal.fire({ icon:'warning', title:'Minimal 1 anggota', text:'Setidaknya satu anggota harus diisi.', confirmButtonColor:'#1a56db' });
+    return;
+  }
+  $(`#member-${idx}`).slideUp(200, function() {
+    $(this).remove();
+    let newIdx = 0;
+    $('.member-card').each(function() {
+      newIdx++;
+      $(this).attr('data-idx', newIdx);
+      $(this).find('.member-number').text(newIdx);
+    });
+    memberCount = newIdx;
+    updateCounters();
+  });
+}
+
+function bindMemberEvents(idx) {
+  $(`#nik-${idx}`).on('input', function() {
+    let digits = cleanDigits($(this).val());
+    if (digits.length > 16) digits = digits.substr(0,16);
+    $(this).val(formatNoKK(digits));
+
+    const cnt = $(`#nikCount-${idx}`);
+    const statusMsg = $(`#nikStatus-${idx}`);
+    cnt.removeClass('ok error');
+    statusMsg.removeClass('ok duplicate').hide();
+
+    if (digits.length < 16 && digits.length > 0) {
+      cnt.text(`${digits.length} / 16 — kurang ${16-digits.length} digit`).addClass('error');
+      return;
+    }
+    if (digits.length === 16) {
+      cnt.text('✓ 16 digit').addClass('ok');
+      clearTimeout(nikCheckTimers[idx]);
+      nikCheckTimers[idx] = setTimeout(() => checkNIKLocal(digits, idx), 700);
+    } else {
+      cnt.text('0 / 16 digit');
+    }
+  });
+
+  $(`#nama-${idx}`).on('input', function() {
+    $(this).val($(this).val().toUpperCase());
+    updateMemberTitle(idx);
+    if ($(`#status-${idx}`).val() === 'Kepala Keluarga') $('#namaKK').val($(this).val());
+  });
+
+  $(`#status-${idx}`).on('change', function() {
+    const val = $(this).val();
+    $(`#memberBadge-${idx}`).text(val||'–');
+    updateMemberTitle(idx);
+
+    const kkCount = $('.status-input').filter(function(){return $(this).val()==='Kepala Keluarga';}).length;
+    if (kkCount > 1) {
+      Swal.fire({ icon:'error', title:'Hanya 1 Kepala Keluarga!', text:'Hanya boleh ada satu Kepala Keluarga.', confirmButtonColor:'#dc3545' });
+      $(this).val(''); $(`#memberBadge-${idx}`).text('–'); return;
+    }
+    if (val === 'Kepala Keluarga') {
+      const namaVal = $(`#nama-${idx}`).val();
+      if (namaVal) $('#namaKK').val(namaVal);
+    }
+    updateCounters();
+  });
+
+  $(`#tptLahir-${idx}, #namaIbu-${idx}, #namaAyah-${idx}`).on('input', function() { $(this).val($(this).val().toUpperCase()); });
+}
+
+function validateForm() {
+  const errors = [];
+  const kkDigits = cleanDigits($('#noKK').val());
+  if (kkDigits.length !== 16) errors.push('No. KK harus tepat 16 digit');
+  if (!$('#alamat').val()) errors.push('Alamat wajib diisi');
+  if (!$('#noRW').val()) errors.push('No. RW wajib dipilih');
+  if (!$('#noRT').val()) errors.push('No. RT wajib dipilih');
+
+  let kepalaCount = 0;
+  const nikSet = new Set();
+  
+  $('.member-card').each(function() {
+    const i = $(this).attr('data-idx');
+    const nikD = cleanDigits($(`#nik-${i}`).val());
+    const nama = $(`#nama-${i}`).val().trim();
+    const status = $(`#status-${i}`).val();
+
+    if (nikD.length !== 16) errors.push(`Anggota #${i}: NIK harus tepat 16 digit`);
+    if (!nama) errors.push(`Anggota #${i}: Nama lengkap wajib diisi`);
+    if (!status) errors.push(`Anggota #${i}: Status hubungan wajib dipilih`);
+    if (status === 'Kepala Keluarga') kepalaCount++;
+
+    const tgl = $(`#tglLahir-${i}`).val();
+    if (!tgl) errors.push(`Anggota #${i}: Tanggal lahir wajib diisi`);
+    
+    if (nikD.length === 16) {
+      if (nikSet.has(nikD)) errors.push('Terdapat NIK yang sama di antara anggota formulir ini.');
+      nikSet.add(nikD);
+    }
+  });
+
+  if (kepalaCount !== 1) errors.push('Harus ada tepat dan hanya 1 anggota berstatus Kepala Keluarga');
+
+  if (errors.length > 0) {
+    Swal.fire({ icon: 'error', title: 'Data Belum Lengkap', html: errors.map(e=>`• ${e}`).join('<br>'), confirmButtonColor: '#dc3545' });
+    return false;
+  }
+  return true;
+}
+
+function resetForm() {
+  $('#mainForm')[0].reset();
+  $('#noKK').val('');
+  $('#namaKK').val('');
+  $('#memberContainer').html('');
+  memberCount = 0;
+  addMember();
+  isEditMode = false;
+  originalEditPayload = null;
+  $('#btnSubmit').text('💾 Simpan Data Keluarga ke Spreadsheet').prop('disabled', false);
+  sessionStorage.removeItem('formDraft');
+}
+
+function clearForm() {
+  Swal.fire({
+    title: 'Konfirmasi',
+    text: 'Yakin ingin mereset formulir? Data yang sedang diisi akan hilang.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Ya, Reset'
+  }).then((result) => {
+    if (result.isConfirmed) resetForm();
+  });
+}
+
+function saveFormToSession() {
+  const payload = getFormDataPayload();
+  sessionStorage.setItem('formDraft', payload);
+}
+
+function handleLogout() {
+  sessionStorage.clear();
+  location.reload();
+}
+function loadExistingData() {
+  $('#loadingOverlay').addClass('show');
+  $('#overlayText').text('Memuat Database...');
+  
+  $.getJSON(APPS_SCRIPT_URL + '?action=getAll')
+    .done(function(data) {
+      const records = data.records || [];
+      const normalizeKey = k => String(k).toLowerCase().replace(/[^a-z0-9]/g, '');
+      
+      existingData = records.map(r => {
+        const getV = (...possibleNames) => {
+          // 1. Precise Match
+          for(const p of possibleNames) {
+             const cleanP = normalizeKey(p);
+             for(const key of Object.keys(r)) {
+               if(normalizeKey(key) === cleanP && r[key] !== undefined && r[key] !== '') return r[key];
+             }
+          }
+          // 2. Contains Match 
+          for(const p of possibleNames) {
+             const cleanP = normalizeKey(p);
+             for(const key of Object.keys(r)) {
+               if(normalizeKey(key).includes(cleanP) && r[key] !== undefined && r[key] !== '') return r[key];
+             }
+          }
+          return '';
+        };
+
+        return {
+          nik: getV('nik'),
+          nama: getV('namalengkap', 'nama'),
+          noKK: getV('nokk', 'kartukeluarga'),
+          namaKK: getV('namakk', 'namakepalakeluarga', 'kepalakeluarga'),
+          alamat: getV('alamat', 'dusun', 'kampung'),
+          rw: getV('rw', 'norw'),
+          rt: getV('rt', 'nort'),
+          statusHubungan: getV('statushubungankeluarga', 'statushubungan', 'shdk', 'hubungan'),
+          jenisKelamin: getV('jeniskelamin', 'jk', 'kelamin'),
+          tempatLahir: getV('tempatlahir', 'tempat'),
+          tanggalLahir: getV('tanggallahir', 'tgllahir', 'lahir'),
+          golonganDarah: getV('golongandarah', 'goongandarah', 'goldar', 'darah'),
+          agama: getV('agama'),
+          pendidikan: getV('pendidikanterakhir', 'pendidikan'),
+          pekerjaan: getV('jenispekerjaan', 'pekerjaan'),
+          statusKawin: getV('statusperkawinan', 'statuskawin', 'kawin', 'perkawinan'),
+          namaIbu: getV('namalengkapibu', 'namaibu', 'ibu'),
+          namaAyah: getV('namalengkapayah', 'namaayah', 'ayah')
+        }
+      });
+      
+      // Auto-fill missing namaKK for members by finding their Kepala Keluarga
+      const kkMap = {};
+      existingData.forEach(r => {
+        if (r.noKK) {
+          if (r.statusHubungan && r.statusHubungan.toLowerCase().includes('kepala') && r.nama) {
+            kkMap[r.noKK] = r.nama;
+          } else if (r.namaKK && r.namaKK !== '-' && !kkMap[r.noKK]) {
+            kkMap[r.noKK] = r.namaKK;
+          }
+        }
+      });
+      
+      existingData.forEach(r => {
+        if (r.noKK && (!r.namaKK || r.namaKK === '-')) {
+          r.namaKK = kkMap[r.noKK] || '-';
+        }
+      });
+
+      $('#connStatus').text(`🟢 Terhubung (${existingData.length} data)`);
+      renderDashboard();
+      renderTable();
+    })
+    .fail(function() {
+      $('#connStatus').text('🔴 Offline — cek koneksi internet');
+    })
+    .always(function() {
+      $('#loadingOverlay').removeClass('show');
+      $('#overlayText').text('Menyimpan data…');
+    });
+}
+
+function renderTable() {
+  const query = $('#searchInput').val().toLowerCase();
+  const filterRW = $('#filterRWDb').val();
+  
+  const filtered = existingData.filter(item => {
+    let matchSearh = false;
+    if(!query) matchSearh = true;
+    else {
+      const textBlock = (item.nama + ' ' + item.nik + ' ' + item.noKK + ' ' + item.namaKK).toLowerCase();
+      matchSearh = textBlock.includes(query);
+    }
+    
+    let matchRw = false;
+    if(!filterRW) matchRw = true;
+    else if(item.rw == filterRW) matchRw = true;
+    
+    return matchSearh && matchRw;
+  });
+  
+  let html = '';
+  if(filtered.length === 0) {
+    html = `<tr><td colspan="7" class="text-center py-4 text-muted">Data tidak ditemukan.</td></tr>`;
+  } else {
+    filtered.forEach((r, i) => {
+      html += `<tr>
+        <td class="ps-3 text-center text-muted" style="font-size: 13.5px;">${i+1}</td>
+        <td>
+          <div class="fw-bold text-dark" style="font-size: 14px;">${r.nama || '-'}</div>
+          <div class="text-primary mt-1" style="font-size:12.5px; font-family:monospace; background:#e8f0fe; display:inline-block; padding:2px 6px; border-radius:4px;">${r.nik || '-'}</div>
+        </td>
+        <td>
+          <div style="font-size: 13.5px;">${r.tempatLahir || '-'}</div>
+          <div class="text-muted" style="font-size: 12.5px;">${r.tanggalLahir || '-'}</div>
+        </td>
+        <td>
+          <div class="fw-bold text-dark" style="font-size: 13.5px;">${r.namaKK || '-'}</div>
+          <div class="text-muted" style="font-size:12.5px;">No. ${r.noKK || '-'}</div>
+        </td>
+        <td>
+          <span class="badge bg-light border text-dark">${r.statusHubungan || '-'}</span>
+        </td>
+        <td>
+          <div style="font-size: 13.5px;">${r.alamat || '-'}</div>
+          <div class="text-muted" style="font-size:12.5px;">RW ${r.rw || '-'} / RT ${r.rt || '-'}</div>
+        </td>
+        <td class="text-center">
+          <div class="btn-group shadow-sm">
+            <button class="btn btn-sm btn-light border" title="Lihat Detail (Read)" onclick="showDetail('${cleanDigits(r.nik)}')">📄</button>
+            <button class="btn btn-sm btn-light border text-primary" title="Edit Data (Update ke Form)" onclick="editData('${cleanDigits(r.nik)}')">✏️</button>
+            <button class="btn btn-sm btn-light border text-danger" title="Hapus (Delete)" onclick="deleteDbRecord('${cleanDigits(r.nik)}')">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    });
+  }
+  $('#dbTable tbody').html(html);
+}
+
+function showDetail(nik) {
+  const item = existingData.find(d => cleanDigits(d.nik) === nik);
+  if(!item) return;
+  
+  let html = `
+    <table class="table table-sm table-borderless mb-0 align-middle">
+      <tr><td class="text-muted" width="35%">NIK</td><td class="fw-bold">: ${item.nik || '-'}</td></tr>
+      <tr><td class="text-muted">Nama Lengkap</td><td class="fw-bold">: ${item.nama || '-'}</td></tr>
+      <tr><td class="text-muted">No. KK</td><td class="fw-bold">: ${item.noKK || '-'}</td></tr>
+      <tr><td class="text-muted">Kepala Keluarga</td><td class="fw-bold">: ${item.namaKK || '-'}</td></tr>
+      <tr><td class="text-muted">Status Hubungan</td><td class="fw-bold text-primary">: ${item.statusHubungan || '-'}</td></tr>
+      <tr><td class="text-muted">Tempat/Tgl Lahir</td><td class="fw-bold">: ${item.tempatLahir || '-'}, ${item.tanggalLahir || '-'}</td></tr>
+      <tr><td class="text-muted">Alamat</td><td class="fw-bold">: ${item.alamat || '-'}</td></tr>
+      <tr><td class="text-muted">RW / RT</td><td class="fw-bold">: ${item.rw || '-'} / ${item.rt || '-'}</td></tr>
+      <tr><td class="text-muted">Jenis Kelamin</td><td class="fw-bold">: ${item.jenisKelamin == '1' || String(item.jenisKelamin).toUpperCase().includes('LAKI') ? 'Laki-laki' : 'Perempuan'}</td></tr>
+      <tr><td class="text-muted">Golongan Darah</td><td class="fw-bold">: ${item.golonganDarah || '-'}</td></tr>
+      <tr><td class="text-muted">Agama</td><td class="fw-bold">: ${item.agama || '-'}</td></tr>
+      <tr><td class="text-muted">Pendidikan</td><td class="fw-bold">: ${item.pendidikan || '-'}</td></tr>
+      <tr><td class="text-muted">Pekerjaan</td><td class="fw-bold">: ${item.pekerjaan || '-'}</td></tr>
+      <tr><td class="text-muted">Status Perkawinan</td><td class="fw-bold">: ${item.statusKawin || '-'}</td></tr>
+      <tr><td class="text-muted">Nama Ibu</td><td class="fw-bold">: ${item.namaIbu || '-'}</td></tr>
+      <tr><td class="text-muted">Nama Ayah</td><td class="fw-bold">: ${item.namaAyah || '-'}</td></tr>
+    </table>
+  `;
+  $('#detailModalBody').html(html);
+  const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+  detailModal.show();
+}
+
+function editData(nik) {
+  const target = existingData.find(d => cleanDigits(d.nik) === nik);
+  if(!target) return;
+  
+  const targetKK = target.noKK;
+  const members = existingData.filter(d => d.noKK === targetKK);
+  
+  members.sort((a,b) => {
+    let aHead = String(a.statusHubungan).toLowerCase().includes('kepala') ? 1 : 0;
+    let bHead = String(b.statusHubungan).toLowerCase().includes('kepala') ? 1 : 0;
+    return bHead - aHead;
+  });
+  
+  switchTab('form');
+  isEditMode = true;
+  $('#btnSubmit').html('💾 Update Data Keluarga ke Spreadsheet');
+  
+  $('#noKK').val(formatNoKK(targetKK)).trigger('input'); 
+  
+  const kkHead = members[0];
+  if(kkHead.alamat) {
+      if (!$('#alamat').find("option[value='" + kkHead.alamat.toUpperCase() + "']").length) {
+          var newOption = new Option(kkHead.alamat.toUpperCase(), kkHead.alamat.toUpperCase(), true, true);
+          $('#alamat').append(newOption).trigger('change');
+      } else {
+          $('#alamat').val(kkHead.alamat.toUpperCase()).trigger('change');
+      }
+  }
+  $('#noRW').val(kkHead.rw).trigger('change');
+  setTimeout(() => { $('#noRT').val(kkHead.rt).trigger('change'); }, 100);
+  
+  $('#memberContainer').empty();
+  memberCount = 0;
+  
+  members.forEach(m => {
+    addMember();
+    const idx = memberCount;
+    
+    $(`#nik-${idx}`).val(formatNoKK(m.nik)).trigger('input');
+    $(`#nama-${idx}`).val(m.nama).trigger('input');
+    // Find closest option for select elements
+    const setSelectVal = (selector, val) => {
+        if (!val) return;
+        const vLower = String(val).toLowerCase().trim();
+        let matched = false;
+        $(selector + ' option').each(function() {
+            if ($(this).val().toLowerCase() === vLower || $(this).text().toLowerCase() === vLower) {
+                $(selector).val($(this).val());
+                matched = true;
+                return false;
+            }
+        });
+        if(!matched) {
+           $(selector + ' option').each(function() {
+              const optVal = $(this).val().toLowerCase();
+              if (optVal && (vLower.includes(optVal) || optVal.includes(vLower))) {
+                  $(selector).val($(this).val());
+                  matched = true;
+                  return false;
+              }
+           });
+        }
+        $(selector).trigger('change');
+    };
+
+    $(`#status-${idx}`).val(m.statusHubungan).trigger('change');
+    // If explicit val failed to set due to case issues, use fuzzy matcher
+    if(!$(`#status-${idx}`).val()) setSelectVal(`#status-${idx}`, m.statusHubungan);
+    
+    let jkVal = "";
+    const jkStr = String(m.jenisKelamin || '').toLowerCase();
+    if(jkStr === '1' || jkStr.includes('laki') || jkStr === 'l') jkVal = "1";
+    if(jkStr === '2' || jkStr.includes('perempuan') || jkStr === 'p' || jkStr === 'w') jkVal = "2";
+    $(`#jk-${idx}`).val(jkVal);
+    
+    $(`#tptLahir-${idx}`).val(m.tempatLahir);
+    
+    if(m.tanggalLahir) {
+      let d = String(m.tanggalLahir).trim();
+      let parts = d.includes('/') ? d.split('/') : (d.includes('-') ? d.split('-') : []);
+      if (parts.length === 3) {
+         if (parts[2].length === 4) { // DD/MM/YYYY
+             $(`#tglLahir-${idx}`).val(`${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`);
+         } else if (parts[0].length === 4) { // YYYY-MM-DD
+             $(`#tglLahir-${idx}`).val(`${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`);
+         }
+      } else {
+         try {
+             let dObj = new Date(d);
+             if(!isNaN(dObj)) $(`#tglLahir-${idx}`).val(dObj.toISOString().split('T')[0]);
+         } catch(e){}
+      }
+    }
+    
+    setSelectVal(`#goldar-${idx}`, m.golonganDarah);
+    setSelectVal(`#agama-${idx}`, m.agama);
+    setSelectVal(`#pendidikan-${idx}`, m.pendidikan);
+    setSelectVal(`#pekerjaan-${idx}`, m.pekerjaan);
+    setSelectVal(`#kawin-${idx}`, m.statusKawin);
+    $(`#namaIbu-${idx}`).val(m.namaIbu);
+    $(`#namaAyah-${idx}`).val(m.namaAyah);
+  });
+  
+  hideKKStatus();
+  $('#kkDupAlert').removeClass('show');
+  
+  setTimeout(() => {
+    originalEditPayload = getFormDataPayload();
+    checkFormChanges();
+  }, 500);
+}
+
+let chartInstances = {};
+
+function calculateAgeFromDateStr(dateStr) {
+  if (!dateStr) return null;
+  let d = String(dateStr).trim();
+  let parts = d.includes('/') ? d.split('/') : (d.includes('-') ? d.split('-') : []);
+  let yyyy, mm, dd;
+  if(parts.length === 3) {
+      if(parts[2].length === 4) { dd = parts[0]; mm = parts[1]; yyyy = parts[2]; } // DD/MM/YYYY
+      else if(parts[0].length === 4) { yyyy = parts[0]; mm = parts[1]; dd = parts[2]; } // YYYY-MM-DD
+  } 
+  if(yyyy && mm && dd) {
+      const birth = new Date(yyyy, mm-1, dd);
+      const diff = Date.now() - birth.getTime();
+      const ageDate = new Date(diff);
+      return Math.abs(ageDate.getUTCFullYear() - 1970);
+  }
+  return null;
+}
+
+function renderDashboard() {
+  const total = existingData.length;
+  const kks = new Set(existingData.map(r => r.noKK).filter(Boolean)).size;
+  
+  // Stats calculation
+  const rwStats = {};
+  const rtStats = {};
+  let laki = 0, perempuan = 0;
+  
+  const umurStats = { 'Balita (0-4)': 0, 'Anak (5-11)': 0, 'Remaja (12-25)': 0, 'Dewasa (26-45)': 0, 'Pra-Lansia (46-59)': 0, 'Lansia (60+)': 0 };
+  const pendStats = {};
+  const kerjStats = {};
+  const agamaStats = {};
+  let totalLansia = 0;
+  
+  existingData.forEach(r => {
+    // Wilayah
+    if (r.rw) rwStats[r.rw] = (rwStats[r.rw] || 0) + 1;
+    if (r.rt && r.rw) {
+        let rtKey = `RW ${r.rw} / RT ${r.rt}`;
+        rtStats[rtKey] = (rtStats[rtKey] || 0) + 1;
+    }
+    
+    // Kelamin
+    let jk = String(r.jenisKelamin || '').toUpperCase();
+    if(jk == '1' || jk.includes('LAKI') || jk == 'L') laki++;
+    else if(jk == '2' || jk.includes('PEREMPUAN') || jk == 'P') perempuan++;
+
+    // Umur
+    let age = calculateAgeFromDateStr(r.tanggalLahir);
+    if(age !== null) {
+       if(age <= 4) umurStats['Balita (0-4)']++;
+       else if(age <= 11) umurStats['Anak (5-11)']++;
+       else if(age <= 25) umurStats['Remaja (12-25)']++;
+       else if(age <= 45) umurStats['Dewasa (26-45)']++;
+       else if(age <= 59) umurStats['Pra-Lansia (46-59)']++;
+       else { umurStats['Lansia (60+)']++; totalLansia++; }
+    }
+    
+    // Pendidikan
+    if(r.pendidikan) {
+       let ed = r.pendidikan.toUpperCase().trim();
+       if(ed !== '-' && ed !== '') pendStats[ed] = (pendStats[ed] || 0) + 1;
+    }
+    // Pekerjaan
+    if(r.pekerjaan) {
+       let pj = r.pekerjaan.toUpperCase().trim();
+       if(pj !== '-' && pj !== '') kerjStats[pj] = (kerjStats[pj] || 0) + 1;
+    }
+    // Agama
+    if(r.agama) {
+       let ag = r.agama.toUpperCase().trim();
+       if(ag !== '-' && ag !== '') agamaStats[ag] = (agamaStats[ag] || 0) + 1;
+    }
+  });
+
+  // Sort and prep charts data
+  const rws = Object.keys(rwStats).sort((a,b)=>a-b);
+  const rwData = rws.map(rw => rwStats[rw]);
+  const rwLabels = rws.map(rw => 'RW ' + rw);
+
+  const umurLabels = Object.keys(umurStats);
+  const umurData = Object.values(umurStats);
+
+  const getTopN = (obj, n) => {
+     let sorted = Object.entries(obj).sort((a,b) => b[1] - a[1]).slice(0, n);
+     return { labels: sorted.map(x=>x[0]), data: sorted.map(x=>x[1]) };
+  };
+
+  const kerjTop = getTopN(kerjStats, 7);
+  const pendTop = getTopN(pendStats, 6);
+  const agamaTop = getTopN(agamaStats, 5);
+
+  let rts = Object.entries(rtStats).sort((a,b) => b[1] - a[1]);
+  let rtsHtml = rts.map((rt, i) => `
+    <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-light rounded-3 border" style="border-color:#f1f5f9!important;">
+      <div class="d-flex align-items-center gap-2">
+        <div class="badge bg-white text-secondary border shadow-sm" style="width:24px; height:24px; display:flex; align-items:center; justify-content:center;">${i+1}</div>
+        <div class="fw-bold text-dark" style="font-size:12px">${rt[0]}</div>
+      </div>
+      <div class="fw-bold text-primary" style="font-size:13px">${rt[1]} <span class="text-muted fw-normal" style="font-size:10px">jiwa</span></div>
+    </div>
+  `).join('');
+
+  let html = `
+    <!-- ROW 1: KPIs -->
+    <div class="row g-2 g-md-3 mb-3">
+      <div class="col-6 col-md-3">
+        <div class="dash-card accent-blue">
+          <div class="val">${total}</div>
+          <div class="lbl"><i class="fa fa-users text-primary me-1"></i> Total Penduduk</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dash-card accent-green">
+          <div class="val">${kks}</div>
+          <div class="lbl"><i class="fa fa-folder-open text-success me-1"></i> Kartu Keluarga</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dash-card accent-orange pb-2">
+          <div class="d-flex justify-content-between text-start mb-2 mt-1">
+            <div class="lbl m-0"><i class="fa fa-male text-warning me-1"></i> Laki-laki</div>
+            <div class="val m-0 fs-5">${laki}</div>
+          </div>
+          <div style="height:1px; background:#f8fafc; margin: 4px 0;"></div>
+          <div class="d-flex justify-content-between text-start mt-2">
+            <div class="lbl m-0"><i class="fa fa-female text-danger me-1"></i> Perempuan</div>
+            <div class="val m-0 fs-5">${perempuan}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dash-card accent-purple pb-2 pt-3">
+          <div class="lbl text-dark mb-3"><i class="fa fa-shield-alt text-primary me-1"></i> Data Rentan</div>
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="text-muted" style="font-size:11px">Lansia (>60)</span>
+            <span class="badge bg-primary px-2" style="font-size:10px">${totalLansia}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-muted" style="font-size:11px">Disabilitas</span>
+            <span class="badge bg-secondary px-2" style="font-size:10px">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ROW 2: Mutasi & Persebaran -->
+    <div class="row g-2 g-md-3 mb-3">
+      <div class="col-12 col-md-4">
+        <div class="dash-chart-card d-flex flex-column">
+          <div class="dash-chart-title">📋 Distribusi per RT</div>
+          <div class="flex-grow-1 custom-scroller pe-1 mt-1" style="overflow-y:auto; max-height:260px">
+             ${rtsHtml}
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-8">
+        <div class="dash-chart-card">
+          <div class="dash-chart-title">📈 Persebaran Penduduk (RW)</div>
+          <div class="chart-wrapper">
+            <canvas id="rwChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3: Demografi Lanjutan -->
+    <div class="row g-2 g-md-3 mb-3">
+      <div class="col-12 col-md-4">
+        <div class="dash-chart-card">
+          <div class="dash-chart-title">📊 Kelompok Umur</div>
+          <div class="chart-wrapper">
+            <canvas id="umurChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="dash-chart-card">
+          <div class="dash-chart-title">🎓 Tingkat Pendidikan</div>
+          <div class="chart-wrapper">
+            <canvas id="pendChart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="dash-chart-card">
+          <div class="dash-chart-title">💼 Mata Pencaharian (Top 7)</div>
+          <div class="chart-wrapper">
+            <canvas id="kerjChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 4 -->
+    <div class="row g-2 g-md-3">
+       <div class="col-12 col-md-6 mb-2 mb-md-0">
+        <div class="dash-chart-card">
+          <div class="dash-chart-title"><i class="fa fa-sync text-success me-1"></i> Mutasi Penduduk (Tahun Ini)</div>
+          <div class="flex-grow-1 d-flex flex-column justify-content-center px-lg-4 px-2" style="min-height: 200px">
+            <div class="d-flex justify-content-between mb-4 text-center">
+              <div><div class="fs-1 fw-bold text-success">--</div><div class="text-muted fw-bold" style="font-size:11px; letter-spacing:0.5px;">LAHIR</div></div>
+              <div><div class="fs-1 fw-bold text-danger">--</div><div class="text-muted fw-bold" style="font-size:11px; letter-spacing:0.5px;">MATI</div></div>
+              <div><div class="fs-1 fw-bold text-primary">--</div><div class="text-muted fw-bold" style="font-size:11px; letter-spacing:0.5px;">DATANG</div></div>
+              <div><div class="fs-1 fw-bold text-warning">--</div><div class="text-muted fw-bold" style="font-size:11px; letter-spacing:0.5px;">PINDAH</div></div>
+            </div>
+            <p class="text-muted mb-0 text-center" style="font-size:11px; line-height: 1.4;"><i class="fa fa-info-circle me-1"></i> Fitur mutasi terpadu menunggu pembaruan koneksi Spreadsheet.</p>
+          </div>
+        </div>
+       </div>
+       <div class="col-12 col-md-6 mb-2 mb-md-0">
+         <div class="dash-chart-card">
+          <div class="dash-chart-title text-start">🕌 Agama</div>
+          <div class="chart-wrapper sm">
+            <canvas id="agamaChart"></canvas>
+          </div>
+        </div>
+       </div>
+    </div>
+  `;
+  $('#dashboardStats').html(html);
+  
+  // Render Chart.js
+  setTimeout(() => {
+    Object.values(chartInstances).forEach(c => c.destroy()); // clear old charts
+    chartInstances = {};
+
+    Chart.defaults.font.family = '"Inter", system-ui, sans-serif';
+    Chart.defaults.color = '#64748b';
+
+    const ctxRw = document.getElementById('rwChart');
+    if(ctxRw) chartInstances.rw = new Chart(ctxRw, {
+      type: 'bar',
+      data: { labels: rwLabels, datasets: [{ label: 'Penduduk', data: rwData, backgroundColor: 'rgba(59, 130, 246, 0.85)', borderRadius: 6, maxBarThickness: 40 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend:{display:false} }, scales: { y: { grid: { color: '#f1f5f9' }, border:{dash:[4,4]}, ticks: {font:{size:10}} }, x: { grid: { display: false }, ticks: {font:{size:10}} } } }
+    });
+
+    const ctxUmur = document.getElementById('umurChart');
+    if(ctxUmur) chartInstances.umur = new Chart(ctxUmur, {
+      type: 'doughnut',
+      data: { labels: umurLabels, datasets: [{ data: umurData, backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'], borderWidth: 0, cutout: '70%' }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend:{position:'bottom', labels: {font:{size:10}, padding: 10, usePointStyle: true, boxWidth: 8}} } }
+    });
+
+    const yAxisShorten = {
+      grid: { display: false },
+      ticks: {
+        font: { size: 10 },
+        callback: function(val) {
+          let l = this.getLabelForValue(val) || '';
+          return l.length > 12 ? l.substring(0, 11) + '…' : l;
+        }
+      }
+    };
+
+    const ctxPend = document.getElementById('pendChart');
+    if(ctxPend) chartInstances.pend = new Chart(ctxPend, {
+      type: 'bar',
+      data: { labels: pendTop.labels, datasets: [{ data: pendTop.data, backgroundColor: 'rgba(139, 92, 246, 0.85)', borderRadius: 4, maxBarThickness: 25 }] },
+      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend:{display:false} }, scales: { x: { grid: { color: '#f1f5f9' }, border:{dash:[4,4]}, ticks: {font:{size:10}} }, y: yAxisShorten } }
+    });
+
+    const ctxKerj = document.getElementById('kerjChart');
+    if(ctxKerj) chartInstances.kerj = new Chart(ctxKerj, {
+      type: 'bar',
+      data: { labels: kerjTop.labels, datasets: [{ data: kerjTop.data, backgroundColor: 'rgba(244, 63, 94, 0.85)', borderRadius: 4, maxBarThickness: 25 }] },
+      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend:{display:false} }, scales: { x: { grid: { color: '#f1f5f9' }, border:{dash:[4,4]}, ticks: {font:{size:10}} }, y: yAxisShorten } }
+    });
+
+    const ctxAgama = document.getElementById('agamaChart');
+    if(ctxAgama) chartInstances.agama = new Chart(ctxAgama, {
+      type: 'pie',
+      data: { labels: agamaTop.labels, datasets: [{ data: agamaTop.data, backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'], borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend:{position:'right', labels: {font:{size:10}, padding: 10, usePointStyle: true, boxWidth: 8}} } }
+    });
+
+  }, 300);
+}
+
+function deleteDbRecord(nik) {
+  Swal.fire({
+    title: 'Hapus data penduduk?',
+    text: `Tindakan ini akan menghapus NIK ${nik} dari Spreadsheet.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Ya, Hapus!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      $('#loadingOverlay').addClass('show');
+      $('#overlayText').text('Menghapus data...');
+      
+      $.ajax({
+        url: APPS_SCRIPT_URL,
+        type: 'POST',
+        data: JSON.stringify({ action: 'deleteMember', nik: "'" + nik }),
+        contentType: 'text/plain; charset=utf-8'
+      }).done(function() {
+        // optimistically update local
+        existingData = existingData.filter(d => cleanDigits(d.nik) !== nik);
+        renderTable();
+        renderDashboard();
+        $('#loadingOverlay').removeClass('show');
+        $('#overlayText').text('Menyimpan data…');
+        Swal.fire('Terhapus', 'Data telah dihapus dari database', 'success');
+      }).fail(function() {
+        $('#loadingOverlay').removeClass('show');
+        $('#overlayText').text('Menyimpan data…');
+        
+        // Even if fail, we can optimistically update
+        existingData = existingData.filter(d => cleanDigits(d.nik) !== nik);
+        renderTable();
+        renderDashboard();
+        Swal.fire('Catatan', 'Gagal memanggil AppScript secara langung (CORS/URL format issue), namun data dihapus secara lokal dalam sesi ini.', 'warning');
+      });
+    }
+  });
+}
+
+function resetForm() {
+  $('#mainForm')[0].reset();
+  $('#memberContainer').empty();
+  isEditMode = false;
+  originalEditPayload = null;
+  $('#btnSubmit').prop('disabled', false).html('💾 Simpan Data Keluarga ke Spreadsheet');
+  memberCount = 0; $('#kkDupAlert').removeClass('show'); hideKKStatus();
+  $('#kkCount').text('0 / 16 digit').removeClass('ok error');
+  $('#namaKK').val(''); $('#cntKK').text('–');
+  addMember(); updateCounters();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// INISIALISASI UTAMA
+$(document).ready(function() {
+  ALAMAT_LIST.forEach(a => $('#alamat').append(new Option(a, a)));
+
+  // Watch for form changes to trigger edit detection
+  $('#mainForm').on('input change', ':input', function() {
+    checkFormChanges();
+  });
+
+  $('#alamat').select2({
+    theme: 'bootstrap-5', tags: true, placeholder: '-- Pilih atau ketik nama dusun --', width: '100%',
+    createTag: function(params) {
+      const term = params.term.trim().toUpperCase();
+      if (!term) return null; return { id: term, text: term + ' (Baru)', newTag: true };
+    }
+  });
+
+  $('#noRW').on('change', function() {
+    const rw = $(this).val();
+    const rtSel = $('#noRT');
+    rtSel.html('<option value="">Pilih RT</option>');
+    if (rw && RT_MAP[rw]) RT_MAP[rw].forEach(rt => rtSel.append(`<option value="${rt}">${rt}</option>`));
+  });
+
+  $('#noKK').on('input', function() {
+    let digits = cleanDigits($(this).val());
+    if (digits.length > 16) digits = digits.substr(0, 16);
+    $(this).val(formatNoKK(digits));
+
+    const cnt = $('#kkCount');
+    cnt.text(`${digits.length} / 16 digit`).removeClass('ok error');
+    clearTimeout(kkCheckTimer); hideKKStatus(); $('#kkDupAlert').removeClass('show');
+
+    if (digits.length === 0) { cnt.text('0 / 16 digit'); return; }
+    if (digits.length < 16) { cnt.text(`${digits.length} / 16 digit — butuh ${16-digits.length} digit lagi`).addClass('error'); return; }
+    
+    cnt.text('✓ 16 digit').addClass('ok');
+    showKKStatus('checking', '⏳ Memeriksa…');
+    kkCheckTimer = setTimeout(() => checkKKLocal(digits), 600);
+  });
+
+  addMember();
+
+  $('#btnAddMember').on('click', addMember);
+
+  $('#mainForm').on('submit', function(e) {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const kkDigits = cleanDigits($('#noKK').val());
+    const alamat = $('#alamat').val().toUpperCase();
+    const rw = $('#noRW').val(); const rt = $('#noRT').val(); const namaKK = $('#namaKK').val();
+
+    const members = [];
+    $('.member-card').each(function() {
+      const i = $(this).attr('data-idx');
+      const tgl = $(`#tglLahir-${i}`).val();
+      let tglFormatted = '';
+      if (tgl) { const [y,m,d] = tgl.split('-'); tglFormatted = `${d}/${m}/${y}`; }
+
+      members.push({
+        nik: "'" + cleanDigits($(`#nik-${i}`).val()),
+        namaLengkap: $(`#nama-${i}`).val(),
+        statusHubungan: $(`#status-${i}`).val(), jenisKelamin: $(`#jk-${i}`).val(),
+        tempatLahir: $(`#tptLahir-${i}`).val(), tanggalLahir: tglFormatted,
+        golonganDarah: $(`#goldar-${i}`).val(), agama: $(`#agama-${i}`).val(),
+        pendidikan: $(`#pendidikan-${i}`).val(), pekerjaan: $(`#pekerjaan-${i}`).val(),
+        statusKawin: $(`#kawin-${i}`).val(), namaIbu: $(`#namaIbu-${i}`).val(), namaAyah: $(`#namaAyah-${i}`).val(),
+      });
+    });
+
+    const payload = { 
+      action: 'submitKK', 
+      isEdit: isEditMode,
+      noKK: "'" + kkDigits, 
+      namaKK: namaKK, 
+      alamat: alamat, 
+      noRW: rw, 
+      noRT: rt, 
+      members: members 
+    };
+
+    $('#loadingOverlay').addClass('show');
+
+    $.ajax({
+      url: APPS_SCRIPT_URL, type: 'POST', data: JSON.stringify(payload), contentType: 'text/plain; charset=utf-8', dataType: 'json'
+    })
+    .done(function(res) {
+      $('#loadingOverlay').removeClass('show');
+      if (res.success) {
+        Swal.fire({
+          icon: 'success', title: isEditMode ? '✅ Berhasil Diupdate!' : '✅ Berhasil Disimpan!',
+          html: `<b>${members.length} anggota</b> keluarga dari <b>${namaKK}</b> berhasil diproses.`,
+          confirmButtonColor: '#1a56db', confirmButtonText: 'Lanjut'
+        }).then(() => {
+          if(isEditMode) {
+             existingData = existingData.filter(d => cleanDigits(d.noKK) !== kkDigits);
+          }
+          members.forEach(m => {
+            existingData.push({
+               noKK: cleanDigits(kkDigits), nik: cleanDigits(m.nik),
+               nama: m.namaLengkap, namaKK: namaKK,
+               alamat: alamat, rw: rw, rt: rt, statusHubungan: m.statusHubungan,
+               jenisKelamin: m.jenisKelamin, tempatLahir: m.tempatLahir, 
+               tanggalLahir: m.tanggalLahir, golonganDarah: m.golonganDarah, 
+               agama: m.agama, pendidikan: m.pendidikan, pekerjaan: m.pekerjaan, 
+               statusKawin: m.statusKawin, namaIbu: m.namaIbu, namaAyah: m.namaAyah
+            });
+          });
+          renderTable();
+          renderDashboard();
+          resetForm();
+        });
+      } else {
+        Swal.fire({ icon:'error', title:'Gagal Menyimpan', html: res.message, confirmButtonColor:'#dc3545' });
+      }
+    })
+    .fail(function(xhr) {
+      $('#loadingOverlay').removeClass('show');
+      Swal.fire({ icon:'error', title:'Gagal Penyimpanan', html: 'Terjadi kesalahan.', confirmButtonColor:'#dc3545' });
+    });
+  });
+});
+
+// LOGIN SYSTEM
+function handleLogin(e) {
+  e.preventDefault();
+  const nik = document.getElementById('loginNik').value;
+  const pwd = document.getElementById('loginPwd').value;
+  const consent = document.getElementById('consentCheck').checked;
+
+  if (nik.length !== 16) {
+    Swal.fire('Error', 'NIK harus 16 digit.', 'error');
+    return;
+  }
+  if (!consent) {
+    Swal.fire('Error', 'Anda harus menyetujui Syarat & Ketentuan.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btnLogin');
+  const oldText = btn.innerText;
+  btn.innerText = 'Memverifikasi...';
+  btn.disabled = true;
+
+  $.ajax({
+    url: APPS_SCRIPT_URL,
+    type: 'POST',
+    data: JSON.stringify({ action: 'login', nik: nik, password: pwd }),
+    contentType: 'text/plain; charset=utf-8',
+    dataType: 'json'
+  })
+  .done(function(res) {
+    if (res.success) {
+      document.getElementById('authOverlay').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+      sessionStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.setItem('loginTime', Date.now());
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: 'Login Berhasil. Hai, ' + res.nama,
+        showConfirmButton: false,
+        timer: 3000
+      });
+      loadExistingData();
+    } else {
+      btn.innerText = oldText;
+      btn.disabled = false;
+      Swal.fire('Akses Ditolak', res.message, 'error');
+    }
+  })
+  .fail(function() {
+    btn.innerText = oldText;
+    btn.disabled = false;
+    Swal.fire('Error', 'Gagal menghubungi server.', 'error');
+  });
+}
+
+// Session Management
+$(document).ready(function() {
+  if (sessionStorage.getItem('isLoggedIn') === 'true') {
+    const loginTime = parseInt(sessionStorage.getItem('loginTime'));
+    if (Date.now() - loginTime > 2 * 60 * 60 * 1000) {
+      handleLogout();
+    } else {
+      document.getElementById('authOverlay').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+      loadExistingData();
+    }
+  }
+  
+  $('#mainForm').on('input', saveFormToSession);
+});
+</script>
+</div> <!-- End of appContainer -->
+</body>
+</html>
