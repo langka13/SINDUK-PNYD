@@ -73,9 +73,17 @@ function doPost(e) {
   let result;
   try {
     const payload = JSON.parse(e.postData.contents);
-    if (payload.action === 'submitKK') result = insertKKData(payload);
-    else if (payload.action === 'login') result = loginPetugas(payload.nik, payload.password);
-    else result = { success: false, message: 'Unknown action' };
+    if (payload.action === 'submitKK') {
+      result = insertKKData(payload);
+    } else if (payload.action === 'login') {
+      result = loginPetugas(payload.nik, payload.password);
+    } else if (payload.action === 'deleteMember') {
+      result = deleteMember(payload.nik);
+    } else if (payload.action === 'editMember') {
+      result = editMember(payload);
+    } else {
+      result = { success: false, message: 'Unknown action' };
+    }
   } catch (err) {
     result = { success: false, message: err.toString() };
   }
@@ -275,7 +283,16 @@ function insertKKData(payload) {
   });
 
   if (insertRow <= lastRow + 1 && foundCluster) {
-    sheet.insertRowsBefore(insertRow, newRows.length);
+    const maxAvailableRows = sheet.getMaxRows();
+    
+    if (insertRow > maxAvailableRows) {
+      // Jika baris target melebihi batas jumlah baris fisik sheet, tambahkan baris baru di bawah
+      sheet.insertRowsAfter(maxAvailableRows, newRows.length);
+    } else {
+      // Jika masih ada ruang, sisipkan seperti biasa
+      sheet.insertRowsBefore(insertRow, newRows.length);
+    }
+    
     for (let k = 0; k < newRows.length; k++) {
       sheet.getRange(insertRow + k, 1, 1, newRows[k].length).setValues([newRows[k]]);
     }
@@ -383,7 +400,19 @@ function repairMisplacedData() {
     sheet.getRange(2, 1, lastRow - 1, numCols).clearContent();
   }
   
-  sheet.getRange(2, 1, sortedRows.length, numCols).setValues(sortedRows);
+  if (sortedRows.length > 0) {
+    var currentMaxRows = sheet.getMaxRows();
+    var neededRows = sortedRows.length + 1; // +1 untuk baris Header
+    
+    // Jika jumlah data membutuhkan baris lebih banyak dari grid yang ada, buat baris sisanya
+    if (neededRows > currentMaxRows) {
+       sheet.insertRowsAfter(currentMaxRows, neededRows - currentMaxRows);
+    }
+    
+    // Paste seluruh data yang sudah rapi
+    sheet.getRange(2, 1, sortedRows.length, numCols).setValues(sortedRows);
+  }
+  
   renumberRows(sheet);
   
   return { moved: 0, message: 'Sort selesai.' };
@@ -422,15 +451,27 @@ function generateDPT() {
     sheetDPT.clear(); // Bersihkan isi dan format lama jika sudah ada
   }
 
+  // PERBAIKAN: Gunakan getValues untuk data utuh, dan getDisplayValues khusus untuk tanggal.
+  // Ini memastikan kita membaca tanggal MURNI sebagai teks persis seperti di layar,
+  // menghindari bug "tanggal gaib" yang dikonversi otomatis oleh Google Sheets.
   const data = sheetData.getDataRange().getValues();
+  const displayData = sheetData.getDataRange().getDisplayValues();
+  
   if (data.length <= 1) {
     SpreadsheetApp.getUi().alert('Data penduduk masih kosong.');
     return;
   }
 
-  // --- PERBAIKAN: Copy persis Header beserta format (warna, border, font) dari ALL DATA ---
+  // Copy persis Header beserta format (warna, border, font) dari ALL DATA
   const numCols = sheetData.getLastColumn();
   sheetData.getRange(1, 1, 1, numCols).copyTo(sheetDPT.getRange(1, 1));
+  
+  // TAMBAHAN: Sisipkan kolom header 'Umur' setelah 'Tanggal Lahir' di DPT
+  const COL_TGL = 11; // Indeks kolom Tanggal Lahir (L)
+  sheetDPT.insertColumnAfter(COL_TGL + 1);
+  sheetDPT.getRange(1, COL_TGL + 2).setValue('Umur');
+  sheetDPT.getRange(1, COL_TGL + 2).setBackground('#1a56db').setFontColor('white').setFontWeight('bold'); // Samakan style header
+
   sheetDPT.setFrozenRows(1); // Bekukan baris pertama (Header)
 
   const header = data[0];
@@ -438,49 +479,78 @@ function generateDPT() {
   const dptRows = [];
 
   // Konfigurasi Kolom (Indeks array dimulai dari 0)
-  const COL_TGL = 11;    // Kolom L (Tanggal Lahir)
   const COL_KAWIN = 16;  // Kolom Q (Status Perkawinan)
 
-  rows.forEach(row => {
-    const tglRaw = String(row[COL_TGL] || '').replace(/'/g, '').trim();
-    const kawin = String(row[COL_KAWIN] || '').toUpperCase();
-    
-    let isEligible = false;
+  // BATAS USIA DPT: 17 Tahun pada 28 Oktober 2026 (Pilkades)
+  // Artinya: Lahir pada atau sebelum 28 Oktober 2009
+  const batasLahirDPT = new Date(2009, 9, 28); // Bulan ke-9 adalah Oktober (indeks 0-11)
+  
+  // Ambil tahun berjalan saat fungsi ini dieksekusi untuk hitungan umur
+  const currentYear = new Date().getFullYear();
 
-    // 1. SYARAT UU PEMILU: Sudah/Pernah Kawin otomatis berhak memilih (meski belum 17 th)
-    if (kawin === 'KAWIN' || kawin === 'CERAI HIDUP' || kawin === 'CERAI MATI') {
+  rows.forEach((row, index) => {
+    const kawin = String(row[COL_KAWIN] || '').toUpperCase().trim();
+    // Ambil data tanggal dari displayData (teks yang terlihat), BUKAN dari data mentah
+    const tglRaw = String(displayData[index + 1][COL_TGL] || '').replace(/'/g, '').trim();
+    let isEligible = false;
+    let calculatedAge = '';
+
+    // 1. SYARAT UU PEMILU: Sudah/Pernah Kawin otomatis berhak memilih
+    if (['KAWIN', 'CERAI HIDUP', 'CERAI MATI'].includes(kawin)) {
       isEligible = true;
     }
 
-    // 2. SYARAT USIA: >= 17 Tahun pada November 2026 (Lahir <= November 2009)
-    if (!isEligible && tglRaw) {
-       // Coba pisahkan format DD/MM/YYYY
-       let parts = tglRaw.split('/');
-       if (parts.length === 3) {
-          let m = parseInt(parts[1], 10); // Bulan
-          let y = parseInt(parts[2], 10); // Tahun
+    // Ekstraksi Tanggal, Bulan, Tahun dengan aman untuk cek batas 2026 dan hitung umur berjalan
+    if (tglRaw) {
+      let y, m, d;
+      if (tglRaw.includes('/')) {
+        let parts = tglRaw.split('/');
+        d = parseInt(parts[0], 10);
+        m = parseInt(parts[1], 10);
+        y = parseInt(parts[2], 10);
+      } else if (tglRaw.includes('-')) {
+        let parts = tglRaw.split('-');
+        if (parts[0].length === 4) { // Jika format YYYY-MM-DD
+          y = parseInt(parts[0], 10);
+          m = parseInt(parts[1], 10);
+          d = parseInt(parts[2], 10);
+        } else { // Jika format DD-MM-YYYY
+          d = parseInt(parts[0], 10);
+          m = parseInt(parts[1], 10);
+          y = parseInt(parts[2], 10);
+        }
+      }
 
-          if (y < 2009) {
-             isEligible = true;
-          } else if (y === 2009 && m <= 11) { // <-- BATAS BULAN NOVEMBER (11)
-             isEligible = true;
-          }
-       } else {
-          // Fallback jika formatnya ternyata YYYY-MM-DD
-          parts = tglRaw.split('-');
-          if (parts.length === 3) {
-              let y = parseInt(parts[0], 10);
-              let m = parseInt(parts[1], 10);
-              if (y < 2009 || (y === 2009 && m <= 11)) { // <-- BATAS BULAN NOVEMBER (11)
-                  isEligible = true;
-              }
-          }
-       }
+      if (y && m && d) {
+         if (y < 100) y += (y < 30 ? 2000 : 1900); // Antisipasi tahun 2 digit (misal: 09 jadi 2009)
+         
+         let tglLahir = new Date(y, m - 1, d); // Bulan dikurangi 1 karena indeks di sistem dimulai dari 0
+         
+         // 2. SYARAT USIA: >= 17 Tahun pada 28 Oktober 2026
+         if (!isEligible && (tglLahir <= batasLahirDPT)) {
+            isEligible = true;
+         }
+         
+         // Hitung umur berdasarkan tahun berjalan
+         calculatedAge = currentYear - y;
+         // Penyesuaian bulan/hari (opsional, jika ingin lebih presisi, tapi untuk tahunan biasa pakai selisih tahun)
+         // let currentMonth = new Date().getMonth();
+         // let currentDay = new Date().getDate();
+         // if (currentMonth < (m-1) || (currentMonth === (m-1) && currentDay < d)) { calculatedAge--; }
+      }
     }
 
     // Jika memenuhi syarat, masukkan ke daftar DPT
     if (isEligible) {
-      dptRows.push(row);
+      // Normalisasi nilai kolom tanggal menjadi teks utuh dengan petik (')
+      // Agar menu filter di sheet DPT menjadi rapi, flat, dan terbaca semua
+      row[COL_TGL] = "'" + tglRaw;
+      
+      // Sisipkan umur ke dalam array baris
+      let modifiedRow = [...row];
+      modifiedRow.splice(COL_TGL + 1, 0, calculatedAge);
+      
+      dptRows.push(modifiedRow);
     }
   });
 
@@ -490,9 +560,70 @@ function generateDPT() {
     for (let i = 0; i < dptRows.length; i++) {
        dptRows[i][0] = i + 1; 
     }
-    sheetDPT.getRange(2, 1, dptRows.length, header.length).setValues(dptRows);
-    SpreadsheetApp.getUi().alert('Berhasil!\n\n' + dptRows.length + ' penduduk telah masuk dalam kriteria DPT Pilkades November 2026.');
+    // Set values dengan jumlah kolom + 1 (kolom umur)
+    sheetDPT.getRange(2, 1, dptRows.length, header.length + 1).setValues(dptRows);
+    
+    // PERBAIKAN FORMAT: Paksa kolom Umur menjadi format angka utuh & posisikan rata tengah
+    sheetDPT.getRange(2, COL_TGL + 2, dptRows.length, 1).setNumberFormat('0').setHorizontalAlignment('center');
+    
+    SpreadsheetApp.getUi().alert('Berhasil!\n\n' + dptRows.length + ' penduduk telah masuk dalam kriteria DPT Pilkades (Batas 28 Oktober 2026).');
   } else {
     SpreadsheetApp.getUi().alert('Tidak ada data penduduk yang memenuhi kriteria DPT.');
   }
+}
+
+// --- FUNGSI MENGHAPUS BARIS DATA PENDUDUK ---
+function deleteMember(nikRaw) {
+  const sheet = getSheet();
+  const data = sheet.getDataRange().getValues();
+  const targetNik = String(nikRaw).replace(/\D/g, ''); 
+  
+  for (let i = 1; i < data.length; i++) {
+    const rowNik = String(data[i][COL.NIK]).replace(/\D/g, '');
+    if (rowNik === targetNik) {
+      sheet.deleteRow(i + 1); // Menghapus baris permanen
+      return { success: true, message: 'Data berhasil dihapus dari server.' };
+    }
+  }
+  return { success: false, message: 'Data tidak ditemukan.' };
+}
+
+// --- FUNGSI MENGUBAH IDENTITAS PENDUDUK ---
+function editMember(payload) {
+  const sheet = getSheet();
+  const data = sheet.getDataRange().getValues();
+  const targetNik = String(payload.nik).replace(/\D/g, '');
+  
+  for (let i = 1; i < data.length; i++) {
+    const rowNik = String(data[i][COL.NIK]).replace(/\D/g, '');
+    if (rowNik === targetNik) {
+      // Menimpa sel dengan data baru
+      if(payload.noKK) sheet.getRange(i + 1, COL.NO_KK + 1).setValue("'" + String(payload.noKK).replace(/\D/g, ''));
+      if(payload.alamat) sheet.getRange(i + 1, COL.ALAMAT + 1).setValue(String(payload.alamat).toUpperCase());
+      if(payload.namaKK) sheet.getRange(i + 1, COL.NAMA_KK + 1).setValue(String(payload.namaKK).toUpperCase());
+      if(payload.rw) sheet.getRange(i + 1, COL.NO_RW + 1).setValue(payload.rw);
+      if(payload.rt) sheet.getRange(i + 1, COL.NO_RT + 1).setValue(payload.rt);
+      if(payload.nama) sheet.getRange(i + 1, COL.NAMA_LENGKAP + 1).setValue(String(payload.nama).toUpperCase());
+      if(payload.statusHubungan) sheet.getRange(i + 1, COL.STATUS + 1).setValue(payload.statusHubungan);
+      if(payload.jenisKelamin) sheet.getRange(i + 1, COL.JK + 1).setValue(payload.jenisKelamin);
+      if(payload.tempatLahir) sheet.getRange(i + 1, COL.TEMPAT_LAHIR + 1).setValue(String(payload.tempatLahir).toUpperCase());
+      
+      if(payload.tanggalLahir) {
+        let tgl = payload.tanggalLahir;
+        if (!tgl.startsWith("'")) tgl = "'" + tgl;
+        sheet.getRange(i + 1, COL.TGL_LAHIR + 1).setValue(tgl);
+      }
+      
+      if(payload.golonganDarah) sheet.getRange(i + 1, COL.GOL_DARAH + 1).setValue(payload.golonganDarah);
+      if(payload.agama) sheet.getRange(i + 1, COL.AGAMA + 1).setValue(payload.agama);
+      if(payload.pendidikan) sheet.getRange(i + 1, COL.PENDIDIKAN + 1).setValue(payload.pendidikan);
+      if(payload.pekerjaan) sheet.getRange(i + 1, COL.PEKERJAAN + 1).setValue(payload.pekerjaan);
+      if(payload.statusKawin) sheet.getRange(i + 1, COL.STATUS_KAWIN + 1).setValue(payload.statusKawin);
+      if(payload.namaIbu) sheet.getRange(i + 1, COL.NAMA_IBU + 1).setValue(String(payload.namaIbu).toUpperCase());
+      if(payload.namaAyah) sheet.getRange(i + 1, COL.NAMA_AYAH + 1).setValue(String(payload.namaAyah).toUpperCase());
+
+      return { success: true, message: 'Data berhasil diperbarui.' };
+    }
+  }
+  return { success: false, message: 'Data tidak ditemukan.' };
 }
